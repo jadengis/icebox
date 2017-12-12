@@ -16,9 +16,23 @@ type TableEntity interface {
 	TableName() string
 }
 
-// Extract a SQL style table name from the type of an object.
+func getTableName(object interface{}) string {
+	var name string
+	if val, ok := object.(TableEntity); ok {
+		name = val.TableName()
+	} else {
+		name = tableNameFromType(objectType)
+	}
+	return name
+}
+
 func tableNameFromType(object interface{}) string {
-	var typeName = reflect.TypeOf(object).String()
+	return tableNameFromType(reflect.TypeOf(object))
+}
+
+// Extract a SQL style table name from the type of an object.
+func tableNameFromType(objectType reflect.Type) string {
+	var typeName = objectType.String()
 	var words = splitOnCaps(typeName)
 
 	// Build a string efficiently from the above slice of words using a buffer.

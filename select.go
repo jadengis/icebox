@@ -24,3 +24,7 @@ func (m *Model) Select(db *DB) error {
 	}
 	return nil
 }
+
+func (m *Model) SelectTx(db *DB) error {
+
+}
