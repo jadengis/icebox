@@ -1,13 +1,60 @@
 package tags
 
+// Tags represent struct-level tags.
+type Tag string
+
+// String maps a Tag to its string representation.
+func (t Tag) String() string {
+	return string(t)
+}
+
+// SubTags behave as tags but differ in that they should never appear at the
+// struct-level, they will always live in the payload of another tag.
+type SubTag string
+
+// String maps a SubTag to its string representation.
+func (t SubTag) String() string {
+	return string(t)
+}
+
+// Const declarations of Tag literals.
+// Icebox:	The tag for scoping all icebox subtags. Any StructField with the
+// Icebox tag will be considered a persisted field.
 const (
-	// Icebox is the go tag for scoping all icebox subtags.
-	// Any StructField with the Icebox tag will be considered a persisted field.
-	Icebox string = "icebox"
-	// Sep is the icebox subtag. Subtags of the icebox tag will be separated by
-	// this value.
-	Sep string = ","
-	// Name is the subtag for specifying the column name for a field.
-	Name       string = "name"
-	PrimaryKey string = "primaryKey"
+	Icebox Tag = "icebox"
 )
+
+// Const declarations for SubTag literals.
+// Column:			The subtag for marking a field as a table column. Subtag info
+// contains the name of the column to use.
+// NotNull:			The subtag for marking a field as not nullable.
+// Unique:			The subtag for marking a field as unique in the column.
+// PrimaryKey:	The subtag for marking a field as primary key in the table.
+// ForeignKey:	The subtag for marking a field as a foreign key in another table.
+// Subtag info contains information about the target table.
+// Check:				The subtag for marking a field as
+// Default:			The subtag for specifying a default value to use for this field.
+// Subtag info contains the default to use.
+// Index:				The subtag for specifying a field should be indexed.
+const (
+	Column     SubTag = "column"
+	NotNull    SubTag = "notNull"
+	Unique     SubTag = "unique"
+	PrimaryKey SubTag = "primaryKey"
+	ForeignKey SubTag = "foreignKey"
+	Check      SubTag = "check"
+	Default    SubTag = "default"
+	Index      SubTag = "index"
+)
+
+// Mapping from subtag string name to subtag.
+var subTagMap = map[string]SubTag{
+	Column.String():     Column,
+	NotNull.String():    NotNull,
+	Unique.String():     Unique,
+	PrimaryKey.String(): PrimaryKey,
+	ForeignKey.String(): ForeignKey,
+	Check.String():      Check,
+	Default.String():    Default,
+	Index.String():      Index,
+}

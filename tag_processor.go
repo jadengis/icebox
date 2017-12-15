@@ -19,9 +19,11 @@ func parseTags(tag reflect.StructTag) {
 		subtags := strings.Split(tag, tags.Sep)
 
 		// Iterate and parse all subtags.
-		seenSubTags := make(map[string]bool)
+		seenSubtags := make(map[string]bool)
 		for _, subtag := range subtags {
+			if _, found := seenSubTags[subtag]; found {
 
+			}
 		}
 	}
 }

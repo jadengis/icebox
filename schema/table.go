@@ -1,5 +1,9 @@
 package schema
 
+import (
+	"reflect"
+)
+
 // Table is a description of a SQL table.
 type Table struct {
 	// Type is the type of the object that generated this table.
