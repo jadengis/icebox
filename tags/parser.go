@@ -29,7 +29,7 @@ func (e *invalidTagError) Error() string {
 // subtags and there subtag info (if available).
 func Parse(subtags string) (map[SubTag]string, error) {
 	result := make(map[SubTag]string)
-	// Make a map to store already seen subtags
+	// Make a map for storing the seen tags
 	seenSubTags := make(map[string]bool)
 
 	// Scan the subtag string for subtag separator delimited chunks.
@@ -51,10 +51,11 @@ func Parse(subtags string) (map[SubTag]string, error) {
 			// Tag is invalid so error
 			return nil, &invalidTagError{
 				tag: name,
-				msg: "tag is unrecognized"}
+				msg: "tag is unknown"}
 		}
 
 		// Tag is valid so add to return value
+		seenSubTags[name] = true
 		result[subtag] = info
 	}
 	return result, nil
@@ -63,13 +64,12 @@ func Parse(subtags string) (map[SubTag]string, error) {
 // Parse the subtag name and info field from the given subtag string.
 func parseNameAndInfo(subtag string) (name, info string) {
 	if i := strings.Index(subtag, payloadSeparator); i >= 0 {
-		name = subtag[0 : i-1]
+		name = subtag[0:i]
 		if i == (len(subtag) - 1) {
 			return name, ""
 		}
-		info = subtag[i+1 : len(subtag)-1]
+		info = subtag[i+1 : len(subtag)]
 		return name, info
-
 	}
 	return subtag, ""
 }

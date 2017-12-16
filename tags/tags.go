@@ -1,6 +1,6 @@
 package tags
 
-// Tags represent struct-level tags.
+// Tag represents a struct-level tag.
 type Tag string
 
 // String maps a Tag to its string representation.
@@ -8,7 +8,7 @@ func (t Tag) String() string {
 	return string(t)
 }
 
-// SubTags behave as tags but differ in that they should never appear at the
+// SubTag is like a tag but differ in that they should never appear at the
 // struct-level, they will always live in the payload of another tag.
 type SubTag string
 
@@ -18,24 +18,24 @@ func (t SubTag) String() string {
 }
 
 // Const declarations of Tag literals.
-// Icebox:	The tag for scoping all icebox subtags. Any StructField with the
+// Icebox: The tag for scoping all icebox subtags. Any StructField with the
 // Icebox tag will be considered a persisted field.
 const (
 	Icebox Tag = "icebox"
 )
 
 // Const declarations for SubTag literals.
-// Column:			The subtag for marking a field as a table column. Subtag info
+// Column:     The subtag for marking a field as a table column. Subtag info
 // contains the name of the column to use.
-// NotNull:			The subtag for marking a field as not nullable.
-// Unique:			The subtag for marking a field as unique in the column.
-// PrimaryKey:	The subtag for marking a field as primary key in the table.
-// ForeignKey:	The subtag for marking a field as a foreign key in another table.
+// NotNull:    The subtag for marking a field as not nullable.
+// Unique:     The subtag for marking a field as unique in the column.
+// PrimaryKey: The subtag for marking a field as primary key in the table.
+// ForeignKey: The subtag for marking a field as a foreign key in another table.
 // Subtag info contains information about the target table.
-// Check:				The subtag for marking a field as
-// Default:			The subtag for specifying a default value to use for this field.
+// Check:      The subtag for marking a field as
+// Default:    The subtag for specifying a default value to use for this field.
 // Subtag info contains the default to use.
-// Index:				The subtag for specifying a field should be indexed.
+// Index:      The subtag for specifying a field should be indexed.
 const (
 	Column     SubTag = "column"
 	NotNull    SubTag = "notNull"
