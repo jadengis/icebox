@@ -62,7 +62,7 @@ func TestParse(t *testing.T) {
 				tagMap, err := Parse(tc.tag)
 
 				if err != nil {
-					t.Errorf("unexpected error parsing %s: error = %s", err.Error())
+					t.Errorf("unexpected error parsing %s: error = %s", tc.tag, err.Error())
 				} else {
 					for i, subTag := range tc.subTags {
 						if val, ok := tagMap[subTag]; ok {
