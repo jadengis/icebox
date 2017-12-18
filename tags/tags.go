@@ -17,6 +17,17 @@ func (t SubTag) String() string {
 	return string(t)
 }
 
+// ParsedTag is the result of parsing a Tags SubTag string. It is essentially
+// a mapping a subtag to its sub tag info.
+type ParsedTag map[SubTag]string
+
+// GetInfo retrieves the sub tag info for the given subtag
+// from the given ParsedTag.
+func (t ParsedTag) GetInfo(subTag SubTag) (string, bool) {
+	val, found := map[SubTag]string(t)[subTag]
+	return val, found
+}
+
 // Const declarations of Tag literals.
 // Icebox: The tag for scoping all icebox subtags. Any StructField with the
 // Icebox tag will be considered a persisted field.

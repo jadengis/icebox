@@ -65,7 +65,7 @@ func TestParse(t *testing.T) {
 					t.Errorf("unexpected error parsing %s: error = %s", tc.tag, err.Error())
 				} else {
 					for i, subTag := range tc.subTags {
-						if val, ok := tagMap[subTag]; ok {
+						if val, ok := tagMap.GetInfo(subTag); ok {
 							if val != tc.infos[i] {
 								t.Errorf("parsed tag info incorrect: %s instead of %s", val, tc.infos[i])
 							}

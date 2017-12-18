@@ -29,14 +29,14 @@ const (
 
 // String converts the given ConstraintType into its string respresentation.
 func (c ConstraintType) String() string {
-	if int(c) < len(constraintTypeNames) {
-		return constraintTypeNames[c]
+	if int(c) < len(constraintTypeTags) {
+		return constraintTypeTags[c].String()
 	}
 	return "constraintType" + strconv.Itoa(int(c))
 }
 
 // Mapping between ConstraintType and tag names.
-var constraintTypeNames = []string{
+var constraintTypeTags = []tags.SubTag{
 	NotNull:    tags.NotNull,
 	Unique:     tags.Unique,
 	PrimaryKey: tags.PrimaryKey,
@@ -61,7 +61,7 @@ func (e unknownTypeError) Error() string {
 
 // Map from constraint type names to corresponding ConstraintType.
 // Will return an unknownTypeError if the name cannot be resolved.
-func getConstraintType(typeName string) (ConstraintType, error) {
+func getConstraintType(typeName tags.SubTag) (ConstraintType, error) {
 	switch typeName {
 	case tags.NotNull:
 		return NotNull, nil
@@ -79,7 +79,7 @@ func getConstraintType(typeName string) (ConstraintType, error) {
 		return Index, nil
 	default:
 		return Invalid, &unknownTypeError{
-			typeName: typeName,
+			typeName: typeName.String(),
 			msg:      "typeName could not be resolved"}
 	}
 }

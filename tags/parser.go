@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+	"unicode"
 )
 
 const (
@@ -27,13 +28,15 @@ func (e *invalidTagError) Error() string {
 
 // Parse will parse the given subtags and produce a mapping between existing
 // subtags and there subtag info (if available).
-func Parse(subtags string) (map[SubTag]string, error) {
+func Parse(subTags string) (ParsedTag, error) {
+	// Sanitize input
+	subTags = stripSpaces(subTags)
 	result := make(map[SubTag]string)
 	// Make a map for storing the seen tags
 	seenSubTags := make(map[string]bool)
 
 	// Scan the subtag string for subtag separator delimited chunks.
-	tagScanner := bufio.NewScanner(strings.NewReader(subtags))
+	tagScanner := bufio.NewScanner(strings.NewReader(subTags))
 	tagScanner.Split(scanSubTagsSeparators)
 	for tagScanner.Scan() {
 		name, info := parseNameAndInfo(tagScanner.Text())
@@ -58,7 +61,7 @@ func Parse(subtags string) (map[SubTag]string, error) {
 		seenSubTags[name] = true
 		result[subtag] = info
 	}
-	return result, nil
+	return ParsedTag(result), nil
 }
 
 // Parse the subtag name and info field from the given subtag string.
@@ -103,4 +106,15 @@ func scanSeparators(
 
 	// Request more bytes
 	return 0, nil, nil
+}
+
+// StripSpaces will remove all whitespace characters from the input string
+// and return it.
+func stripSpaces(str string) string {
+	return strings.Map(func(r rune) rune {
+		if unicode.IsSpace(r) {
+			return -1
+		}
+		return r
+	}, str)
 }
