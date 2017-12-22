@@ -54,6 +54,7 @@ func TestParse(t *testing.T) {
 		{"column:id,primaryKey,default:0",
 			[]SubTag{Column, PrimaryKey, Default},
 			[]string{"id", "", "0"}},
+		{"manyToOne", []SubTag{ManyToOne}, []string{""}},
 	}
 
 	for _, tc := range testCases {

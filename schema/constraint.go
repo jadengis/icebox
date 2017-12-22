@@ -7,18 +7,19 @@ import (
 
 // ConstraintType is the type of a constraint on a column.
 // There are 7 constraint types to be supported by icebox.
-// NotNull: Ensures that a column cannot have a NULL value
-// Unique: Ensures that all values in a column are different
-// PrimaryKey: A combination of a NOT NULL and UNIQUE. Uniquely identifies each row in a table
+// NotNull:    Ensures that a column cannot have a NULL value
+// Unique:     Ensures that all values in a column are different
+// PrimaryKey: A combination of a NOT NULL and UNIQUE. Uniquely identifies each
+// row in a table
 // ForeignKey: Uniquely identifies a row/record in another table
-// Check: Ensures that all values in a column satisfies a specific condition
-// Default: Sets a default value for a column when no value is specified
-// Index: Used to create and retrieve data from the database very quickly
+// Check:      Ensures that all values in a column satisfies a specific condition
+// Default:    Sets a default value for a column when no value is specified
+// Index:      Used to create and retrieve data from the database very quickly
 type ConstraintType int
 
 const (
-	Invalid ConstraintType = -1
-	NotNull ConstraintType = iota
+	InvalidConstraint ConstraintType = -1
+	NotNull           ConstraintType = iota
 	Unique
 	PrimaryKey
 	ForeignKey
@@ -46,19 +47,6 @@ var constraintTypeTags = []tags.SubTag{
 	Index:      tags.Index,
 }
 
-// This is the type of error to raise if the typeName cannot be resolved.
-// typeName is the unresolved typeName.
-// msg is an error message to return.
-type unknownTypeError struct {
-	typeName string
-	msg      string
-}
-
-// Produce an error message for an unknownTypeError.
-func (e unknownTypeError) Error() string {
-	return e.msg + " : " + e.typeName
-}
-
 // Map from constraint type names to corresponding ConstraintType.
 // Will return an unknownTypeError if the name cannot be resolved.
 func getConstraintType(typeName tags.SubTag) (ConstraintType, error) {
@@ -78,7 +66,7 @@ func getConstraintType(typeName tags.SubTag) (ConstraintType, error) {
 	case tags.Index:
 		return Index, nil
 	default:
-		return Invalid, &unknownTypeError{
+		return InvalidConstraint, &unknownTypeError{
 			typeName: typeName.String(),
 			msg:      "typeName could not be resolved"}
 	}
@@ -90,4 +78,13 @@ func getConstraintType(typeName tags.SubTag) (ConstraintType, error) {
 type Constraint struct {
 	Type ConstraintType
 	Info string
+}
+
+// NewConstraint constructs a new constraint with the given type and info, and
+// returns a pointer to this object.
+func NewConstraint(contraintType ConstraintType, info string) *Constraint {
+	return &Constraint{
+		Type: contraintType,
+		Info: info,
+	}
 }

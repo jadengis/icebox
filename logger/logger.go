@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// The prefix to use for all logs in this logger.
 const logPrefix string = "Icebox::"
 
 // LogLevel is an enumeration type of increasing logging severities.
@@ -36,11 +37,13 @@ var logLevelNames = []string{
 	ERROR: "ERROR::",
 }
 
+// A Logger with a logging level construct.
 type leveledLogger struct {
 	logger *log.Logger
 	level  LogLevel
 }
 
+// The internal leveled Logger to use for this logging package.
 var iceboxLogger *leveledLogger
 
 // Init is a method for initializing this package for logging.
@@ -55,25 +58,30 @@ func Init(out io.Writer, flag int, level LogLevel) {
 	}
 }
 
+// Debug writes icebox logs with the configured logger at the DEBUG level.
 func Debug(v ...interface{}) {
 	logIfValidLevel(DEBUG, v)
 }
 
+// Info writes icebox logs with the configured logger at the INFO level.
 func Info(v ...interface{}) {
 	logIfValidLevel(INFO, v)
 }
 
+// Warn writes icebox logs with the configured logger at the WARN level.
 func Warn(v ...interface{}) {
 	logIfValidLevel(WARN, v)
 }
 
+// Error writes icebox logs with the configured logger at the ERROR level.
 func Error(v ...interface{}) {
 	logIfValidLevel(ERROR, v)
 }
 
-//
+// Writes a log if the given level is greater than or equal to the
+// configured level.
 func logIfValidLevel(level LogLevel, v ...interface{}) {
-	if iceboxLogger.level >= level {
+	if iceboxLogger.level <= level {
 		iceboxLogger.logger.Println(level.String(), v)
 	}
 }

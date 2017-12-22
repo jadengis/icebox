@@ -23,9 +23,9 @@ type IdEntity interface {
 // For a new type to be recognized as an icebox entity, it must contain this
 // Model as an embedded type.
 type Model struct {
-	id        Id
-	CreatedAt *time.Time `icebox:"name:created_at"`
-	UpdatedAt *time.Time `icebox:"name:updated_at"`
+	Id        Id         `icebox:"column:id,primaryKey"`
+	CreatedAt *time.Time `icebox:"column:created_at"`
+	UpdatedAt *time.Time `icebox:"column:updated_at"`
 }
 
 // Id retrieves this Models underlying Id.

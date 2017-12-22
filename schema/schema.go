@@ -1,18 +1,18 @@
 package schema
 
-type Relation struct {
-	relatedTable *Table
-}
+import (
+	"reflect"
+)
 
 type Schema struct {
 	Name   string
-	Tables map[string]Table
+	Tables map[reflect.Type]*Table
 }
 
-// Func NewSchema constructs a new Schema with the given name and empty
+// NewSchema constructs a new Schema with the given name and empty
 // Table map.
 func NewSchema(name string) *Schema {
 	return &Schema{
 		Name:   name,
-		Tables: make(map[string]Table)}
+		Tables: make(map[reflect.Type]*Table)}
 }

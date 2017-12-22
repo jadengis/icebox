@@ -28,25 +28,45 @@ func (t ParsedTag) GetInfo(subTag SubTag) (string, bool) {
 	return val, found
 }
 
-// Const declarations of Tag literals.
+// Const Declarations of Tag Literals
+//
 // Icebox: The tag for scoping all icebox subtags. Any StructField with the
 // Icebox tag will be considered a persisted field.
 const (
 	Icebox Tag = "icebox"
 )
 
-// Const declarations for SubTag literals.
+// Const Declarations for SubTag Literals
+//
 // Column:     The subtag for marking a field as a table column. Subtag info
 // contains the name of the column to use.
+//
 // NotNull:    The subtag for marking a field as not nullable.
+//
 // Unique:     The subtag for marking a field as unique in the column.
+//
 // PrimaryKey: The subtag for marking a field as primary key in the table.
+//
 // ForeignKey: The subtag for marking a field as a foreign key in another table.
 // Subtag info contains information about the target table.
+//
 // Check:      The subtag for marking a field as
+//
 // Default:    The subtag for specifying a default value to use for this field.
 // Subtag info contains the default to use.
+//
 // Index:      The subtag for specifying a field should be indexed.
+//
+// OneToOne:   The subtag for making a one to one relationship between a
+// and one of its fields.
+//
+// OneToMany:  The subtag for making a one to many relationship between a
+// column and another table. Subtag info contains field name to select on.
+//
+// ManyToOne:  The subtag for marking a many to one relationship between a table
+// and one of its fields.
+//
+// ManyToMany: TODO
 const (
 	Column     SubTag = "column"
 	NotNull    SubTag = "notNull"
@@ -56,6 +76,10 @@ const (
 	Check      SubTag = "check"
 	Default    SubTag = "default"
 	Index      SubTag = "index"
+	OneToOne   SubTag = "oneToOne"
+	OneToMany  SubTag = "oneToMany"
+	ManyToOne  SubTag = "manyToOne"
+	ManyToMany SubTag = "manyToMany"
 )
 
 // Mapping from subtag string name to subtag.
@@ -68,4 +92,8 @@ var subTagMap = map[string]SubTag{
 	Check.String():      Check,
 	Default.String():    Default,
 	Index.String():      Index,
+	OneToOne.String():   OneToOne,
+	OneToMany.String():  OneToMany,
+	ManyToOne.String():  ManyToOne,
+	ManyToMany.String(): ManyToMany,
 }

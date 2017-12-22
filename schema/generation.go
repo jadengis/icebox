@@ -1,32 +1,11 @@
 package schema
 
 import (
-	"fmt"
+	"github.com/jadengis/icebox/logger"
 	"github.com/jadengis/icebox/tags"
+	"github.com/jadengis/icebox/types"
 	"reflect"
 )
-
-// schemaGenError is a general wrapper for schema generation errors.
-type schemaGenError struct {
-	cause error
-	msg   string
-}
-
-// Error message for a schema generation error.
-func (e *schemaGenError) Error() string {
-	return fmt.Sprintf("%s - %s", e.msg, e.cause.Error())
-}
-
-// Schema generation error relating to a bad type.
-type typeError struct {
-	badType reflect.Type
-	msg     string
-}
-
-// Error message for this type error.
-func (e *typeError) Error() string {
-	return fmt.Sprintf("unsupported type %s - %s", e.badType, e.msg)
-}
 
 // generateSchema will construct a database schema given a name for the database
 // and a list of objects.
@@ -34,13 +13,13 @@ func generateSchema(name string, objects ...interface{}) (*Schema, error) {
 	// Iterate through the all the objects, and build tables for each.
 	schema := NewSchema(name)
 	for i := 0; i < len(objects); i++ {
-		table, err := generateTable(object[i])
+		table, err := generateTable(objects[i])
 		if err != nil {
 			return nil, &schemaGenError{
 				cause: err,
 				msg:   "error generating table"}
 		}
-		Tables[table.Name] = table
+		schema.Tables[table.Type] = table
 	}
 	return schema, nil
 }
@@ -50,7 +29,7 @@ func generateTable(object interface{}) (*Table, error) {
 	if objectType.Kind() == reflect.Ptr {
 		objectType = objectType.Elem()
 	}
-	if objectType != reflect.Struct {
+	if objectType.Kind() != reflect.Struct {
 		return nil, &typeError{
 			badType: objectType,
 			msg:     "only structs and ptr to struct are supported types"}
@@ -63,15 +42,70 @@ func generateTable(object interface{}) (*Table, error) {
 	table := NewTable(objectType, name)
 	for i := 0; i < objectType.NumField(); i++ {
 		field := objectType.Field(i)
-		tags := field.Tag()
 
 		// Check the field for an Icebox tag, and parse subtags if needed.
-		if tag, ok := tag.Lookup(tags.Icebox); ok {
-			parsedTags, err := tags.Parse(tag)
+		if tag, ok := field.Tag.Lookup(tags.Icebox.String()); ok {
+			parsedTag, err := tags.Parse(tag)
 			if err != nil {
-
+				logger.Error("could not parse tags", err)
 			}
-
+			column := handleColumnTag(field, parsedTag)
+			if column != nil {
+				constraints := handleConstraintTags(parsedTag)
+				column.bulkAddConstraints(constraints)
+				table.Columns[column.Name] = column
+			}
 		}
 	}
+	return table, nil
+}
+
+func getConcreteObjectType(objectType reflect.Type) reflect.Type {
+	if objectType.Kind() == reflect.Ptr {
+		objectType = objectType.Elem()
+	}
+	return objectType
+}
+
+func handleColumnTag(field reflect.StructField, parsedTag tags.ParsedTag) *Column {
+	if info, found := parsedTag.GetInfo(tags.Column); found {
+		delete(parsedTag, tags.Column)
+		if len(info) == 0 {
+			info = sqlNameFromCamelCase(field.Name)
+		}
+		sqlType, err := mapSQLTypeFromField(field)
+		if err != nil {
+			return nil
+		}
+		return NewColumn(info, sqlType)
+	}
+	return nil
+}
+
+func mapSQLTypeFromField(field reflect.StructField) (*types.SQLType, error) {
+	switch kind := getConcreteObjectType(field.Type).Kind(); kind {
+	case reflect.Int8:
+		return types.NewSQLType(types.TinyInt, nil), nil
+	default:
+		return nil, &unknownTypeError{
+			typeName: kind.String(),
+			msg:      "unsupported go type",
+		}
+	}
+}
+
+// Construct a slice of Constraints from the given parsed tag.
+func handleConstraintTags(parsedTag tags.ParsedTag) []*Constraint {
+	var constraints []*Constraint
+	for tag, info := range parsedTag {
+		constraintType, err := getConstraintType(tag)
+		if err != nil {
+			// this is not a contraint tag so skip it.
+			continue
+		}
+		constraint := NewConstraint(constraintType, info)
+		delete(parsedTag, tag)
+		constraints = append(constraints, constraint)
+	}
+	return constraints
 }
