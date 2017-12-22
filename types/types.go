@@ -13,8 +13,19 @@ type SQLType struct {
 	Args map[ArgType]string
 }
 
-// NewSQLType constructs a new SQLType object with the given information.
-func NewSQLType(iceboxType IceboxType, args map[ArgType]string) *SQLType {
+// NewSQLType constructs a new SQLType object with default args.
+func NewSQLType(iceboxType IceboxType) *SQLType {
+	return &SQLType{
+		IceboxType: iceboxType,
+		Args:       make(map[ArgType]string),
+	}
+}
+
+// NewSQLTypeWithSize constructs a new SQLType object with the given
+// size information.
+func NewSQLTypeWithSize(iceboxType IceboxType, size string) *SQLType {
+	args := make(map[ArgType]string)
+	args[Size] = size
 	return &SQLType{
 		IceboxType: iceboxType,
 		Args:       args,
@@ -36,11 +47,17 @@ const (
 	LongBlob
 
 	// Numeric types
+	Bit
 	TinyInt
+	TinyUint
 	SmallInt
+	SmallUint
 	MediumInt
+	MediumUint
 	Int
+	Uint
 	BigInt
+	BigUint
 	Float
 	Double
 	Decimal

@@ -84,8 +84,34 @@ func handleColumnTag(field reflect.StructField, parsedTag tags.ParsedTag) *Colum
 
 func mapSQLTypeFromField(field reflect.StructField) (*types.SQLType, error) {
 	switch kind := getConcreteObjectType(field.Type).Kind(); kind {
+	case reflect.Bool:
+		return types.NewSQLType(types.Bit), nil
 	case reflect.Int8:
-		return types.NewSQLType(types.TinyInt, nil), nil
+		return types.NewSQLType(types.TinyInt), nil
+	case reflect.Int16:
+		return types.NewSQLType(types.SmallInt), nil
+	case reflect.Int32:
+		return types.NewSQLType(types.MediumInt), nil
+	case reflect.Int64:
+		fallthrough
+	case reflect.Int:
+		return types.NewSQLType(types.Int), nil
+	case reflect.Uint8:
+		return types.NewSQLType(types.TinyUint), nil
+	case reflect.Uint16:
+		return types.NewSQLType(types.SmallUint), nil
+	case reflect.Uint32:
+		return types.NewSQLType(types.MediumUint), nil
+	case reflect.Uint64:
+		fallthrough
+	case reflect.Uint:
+		return types.NewSQLType(types.Uint), nil
+	case reflect.Float32:
+		return types.NewSQLType(types.Float), nil
+	case reflect.Float64:
+		return types.NewSQLType(types.Double), nil
+	case reflect.String:
+		return types.NewSQLTypeWithSize(types.VarChar, "255"), nil
 	default:
 		return nil, &unknownTypeError{
 			typeName: kind.String(),
