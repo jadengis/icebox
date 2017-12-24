@@ -1,3 +1,17 @@
+// Copyright 2017 John Dengis
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package schema
 
 import (
@@ -21,8 +35,8 @@ import (
 type Column interface {
 	Name() string
 	Type() types.SQLType
-	ConstraintFor(ConstraintType) (Constraint, bool)
 	Constraints() []Constraint
+	ConstraintFor(ConstraintType) (Constraint, bool)
 }
 
 // The default implementation of the Column interface.
@@ -31,14 +45,15 @@ type Column interface {
 //
 // Type is the SQLType of the column in the schema.
 //
-// Constraints is the list of contraints on the column, such as
-// PRIMARY KEY or NOT NULL.
+// Constraints is a map of all contraints on the column, such as
+// PRIMARY KEY or NOT NULL, key off by type.
 type columnImpl struct {
 	name        string
 	sqlType     types.SQLType
 	constraints map[ConstraintType]*constraintImpl
 }
 
+// Return the internal name of the column.
 func (c *columnImpl) Name() string {
 	return c.name
 }
@@ -47,11 +62,14 @@ func (c *columnImpl) Type() types.SQLType {
 	return c.sqlType
 }
 
+// Look up the given constraint type in the column, and return it if it exists, along
+// with a bool indicating its existence.
 func (c *columnImpl) ConstraintFor(constraintType ConstraintType) (Constraint, bool) {
 	constraint, found := c.constraints[constraintType]
 	return constraint, found
 }
 
+// Return a list of all constraints in the constraints map for this column.
 func (c *columnImpl) Constraints() []Constraint {
 	constraints := make([]Constraint, len(c.constraints))
 	for _, constraint := range c.constraints {
@@ -60,7 +78,8 @@ func (c *columnImpl) Constraints() []Constraint {
 	return constraints
 }
 
-// NewColumn constructs a new column object with the given name and type.
+// Construct a new columnImpl object with the given name and SQLType,
+// and return a pointer to it.
 func newColumn(name string, sqlType types.SQLType) *columnImpl {
 	return &columnImpl{
 		name:        name,
@@ -69,7 +88,7 @@ func newColumn(name string, sqlType types.SQLType) *columnImpl {
 	}
 }
 
-// Add a slice of Constraints to the Column.
+// Add a slice of constraints to the column.
 func (c *columnImpl) bulkAddConstraints(constraints []*constraintImpl) {
 	for _, constraint := range constraints {
 		c.constraints[constraint.constraintType] = constraint

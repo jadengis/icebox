@@ -1,3 +1,17 @@
+// Copyright 2017 John Dengis
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package schema
 
 import (
@@ -98,21 +112,23 @@ func getConstraintType(typeName tags.SubTag) (ConstraintType, error) {
 //
 // ConstraintType is the ConstraintType of this Constraint.
 //
-// Info is additional details about this constraint in the form of a string.
+// Details is additional details about this constraint in the form of a string.
 type constraintImpl struct {
 	constraintType ConstraintType
 	details        string
 }
 
+// Returns the internal constraint type of this constraint.
 func (c *constraintImpl) Type() ConstraintType {
 	return c.constraintType
 }
 
+// Returns the internal details of the constraint.
 func (c *constraintImpl) Details() string {
 	return c.details
 }
 
-// NewConstraint constructs a new constraint of the default implemention,
+// Constructs a new constraint of the default implementation,
 // with the given type and details, and returns a pointer to this object.
 func newConstraint(constraintType ConstraintType, details string) *constraintImpl {
 	return &constraintImpl{
