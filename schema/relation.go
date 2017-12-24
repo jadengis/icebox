@@ -4,10 +4,34 @@ import (
 	"github.com/jadengis/icebox/tags"
 )
 
+// Relation represents a relation between two tables in a schema, for example
+// if a column in Table A holds a primary key to a row in Table B, these two
+// tables are related.
+//
+// A relation can be described by its type, e.g OneToOne, OneToMany etc., what
+// table it points to, and some type specific details.
+//
+// Type returns the relation type of this relation.
+//
+// PointsTo returns the table that this relation points to.
+//
+// Details returns the type specific details of the relation.
+type Relation interface {
+	Type() RelationType
+	PointsTo() Table
+	Details() string
+}
+
 // RelationType is the type of a relation between two tables.
-// There are 3 relation types to be supported by icebox.
+//
+// There are 4 relation types to be supported by icebox.
+//
+// OneToOne:   One row of the left table corresponds to one in the right table.
+//
 // OneToMany:  One row of the left table corresponds to many in the right table.
+//
 // ManyToOne:  Many rows in the left table correspond to one in the right table.
+//
 // ManyToMany: Many rows in the left table correspond to many in the right table.
 type RelationType int
 
@@ -34,11 +58,22 @@ func getRelationType(typeName tags.SubTag) (RelationType, error) {
 			typeName: typeName.String(),
 			msg:      "typeName could not be resolved"}
 	}
-
 }
 
-type Relation struct {
-	Type  RelationType
-	Table *Table
-	Info  string
+type relationImpl struct {
+	relationType RelationType
+	table        *tableImpl
+	details      string
+}
+
+func (r *relationImpl) Type() RelationType {
+	return r.relationType
+}
+
+func (r *relationImpl) PointsTo() Table {
+	return r.table
+}
+
+func (r *relationImpl) Details() string {
+	return r.details
 }

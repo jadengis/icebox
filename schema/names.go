@@ -22,7 +22,7 @@ func sqlNameFromCamelCase(name string) string {
 		buffer.WriteString(strings.ToLower(words[i]))
 		buffer.WriteString(nameSeparator)
 	}
-	buffer.WriteString(words[i])
+	buffer.WriteString(strings.ToLower(words[i]))
 	return buffer.String()
 }
 

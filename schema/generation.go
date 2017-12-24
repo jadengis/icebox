@@ -7,11 +7,11 @@ import (
 	"reflect"
 )
 
-// generateSchema will construct a database schema given a name for the database
+// NewSchema will construct a database schema given a name for the database
 // and a list of objects.
-func generateSchema(name string, objects ...interface{}) (*Schema, error) {
+func NewSchema(name string, objects ...interface{}) (Schema, error) {
 	// Iterate through the all the objects, and build tables for each.
-	schema := NewSchema(name)
+	schema := newSchema(name)
 	for i := 0; i < len(objects); i++ {
 		table, err := generateTable(objects[i])
 		if err != nil {
@@ -19,12 +19,12 @@ func generateSchema(name string, objects ...interface{}) (*Schema, error) {
 				cause: err,
 				msg:   "error generating table"}
 		}
-		schema.Tables[table.Type] = table
+		schema.tables[table.dataType] = table
 	}
 	return schema, nil
 }
 
-func generateTable(object interface{}) (*Table, error) {
+func generateTable(object interface{}) (*tableImpl, error) {
 	objectType := reflect.TypeOf(object)
 	if objectType.Kind() == reflect.Ptr {
 		objectType = objectType.Elem()
@@ -39,7 +39,7 @@ func generateTable(object interface{}) (*Table, error) {
 	// parsing out tags, and building the appropraite columns with the appropriate
 	// constraints.
 	name := getTableName(object)
-	table := NewTable(objectType, name)
+	table := newTable(objectType, name)
 	for i := 0; i < objectType.NumField(); i++ {
 		field := objectType.Field(i)
 
@@ -53,7 +53,7 @@ func generateTable(object interface{}) (*Table, error) {
 			if column != nil {
 				constraints := handleConstraintTags(parsedTag)
 				column.bulkAddConstraints(constraints)
-				table.Columns[column.Name] = column
+				table.columns[column.name] = column
 			}
 		}
 	}
@@ -67,7 +67,7 @@ func getConcreteObjectType(objectType reflect.Type) reflect.Type {
 	return objectType
 }
 
-func handleColumnTag(field reflect.StructField, parsedTag tags.ParsedTag) *Column {
+func handleColumnTag(field reflect.StructField, parsedTag tags.ParsedTag) *columnImpl {
 	if info, found := parsedTag.GetInfo(tags.Column); found {
 		delete(parsedTag, tags.Column)
 		if len(info) == 0 {
@@ -77,12 +77,12 @@ func handleColumnTag(field reflect.StructField, parsedTag tags.ParsedTag) *Colum
 		if err != nil {
 			return nil
 		}
-		return NewColumn(info, sqlType)
+		return newColumn(info, sqlType)
 	}
 	return nil
 }
 
-func mapSQLTypeFromField(field reflect.StructField) (*types.SQLType, error) {
+func mapSQLTypeFromField(field reflect.StructField) (types.SQLType, error) {
 	switch kind := getConcreteObjectType(field.Type).Kind(); kind {
 	case reflect.Bool:
 		return types.NewSQLType(types.Bit), nil
@@ -120,16 +120,16 @@ func mapSQLTypeFromField(field reflect.StructField) (*types.SQLType, error) {
 	}
 }
 
-// Construct a slice of Constraints from the given parsed tag.
-func handleConstraintTags(parsedTag tags.ParsedTag) []*Constraint {
-	var constraints []*Constraint
+// Construct a slice of constraints from the given parsed tag.
+func handleConstraintTags(parsedTag tags.ParsedTag) []*constraintImpl {
+	var constraints []*constraintImpl
 	for tag, info := range parsedTag {
 		constraintType, err := getConstraintType(tag)
 		if err != nil {
 			// this is not a contraint tag so skip it.
 			continue
 		}
-		constraint := NewConstraint(constraintType, info)
+		constraint := newConstraint(constraintType, info)
 		delete(parsedTag, tag)
 		constraints = append(constraints, constraint)
 	}

@@ -5,15 +5,37 @@ import (
 	"strconv"
 )
 
+// Constraint is a representation of a constraint on a SQL column.
+// These can be things such as PRIMARY KEY, NOT NULL, or UNIQUE.
+// A constraint can be fully described by its constraint type, along with
+// some optional details to describe that type.
+//
+// Type returns the constraint type of this constraint.
+//
+// Details returns the specific details of this contraint. For example the
+// DEFAULT should have some default value specified in the details.
+type Constraint interface {
+	Type() ConstraintType
+	Details() string
+}
+
 // ConstraintType is the type of a constraint on a column.
+//
 // There are 7 constraint types to be supported by icebox.
+//
 // NotNull:    Ensures that a column cannot have a NULL value
+//
 // Unique:     Ensures that all values in a column are different
+//
 // PrimaryKey: A combination of a NOT NULL and UNIQUE. Uniquely identifies each
 // row in a table
+//
 // ForeignKey: Uniquely identifies a row/record in another table
+//
 // Check:      Ensures that all values in a column satisfies a specific condition
+//
 // Default:    Sets a default value for a column when no value is specified
+//
 // Index:      Used to create and retrieve data from the database very quickly
 type ConstraintType int
 
@@ -72,19 +94,29 @@ func getConstraintType(typeName tags.SubTag) (ConstraintType, error) {
 	}
 }
 
-// Constraint is a description of a SQL constraint on a column.
-// Type is the ConstraintType of this Constraint.
-// Info is additional info about this constaint in the form of a string.
-type Constraint struct {
-	Type ConstraintType
-	Info string
+// The default implementation of the Constraint interface.
+//
+// ConstraintType is the ConstraintType of this Constraint.
+//
+// Info is additional details about this constraint in the form of a string.
+type constraintImpl struct {
+	constraintType ConstraintType
+	details        string
 }
 
-// NewConstraint constructs a new constraint with the given type and info, and
-// returns a pointer to this object.
-func NewConstraint(contraintType ConstraintType, info string) *Constraint {
-	return &Constraint{
-		Type: contraintType,
-		Info: info,
+func (c *constraintImpl) Type() ConstraintType {
+	return c.constraintType
+}
+
+func (c *constraintImpl) Details() string {
+	return c.details
+}
+
+// NewConstraint constructs a new constraint of the default implemention,
+// with the given type and details, and returns a pointer to this object.
+func newConstraint(constraintType ConstraintType, details string) *constraintImpl {
+	return &constraintImpl{
+		constraintType: constraintType,
+		details:        details,
 	}
 }

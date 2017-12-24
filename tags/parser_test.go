@@ -75,6 +75,7 @@ func TestParse(t *testing.T) {
 						}
 					}
 				}
-			})
+			},
+		)
 	}
 }
