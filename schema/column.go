@@ -53,23 +53,24 @@ type columnImpl struct {
 	constraints map[ConstraintType]*constraintImpl
 }
 
-// Return the internal name of the column.
+// Returns the name of the column.
 func (c *columnImpl) Name() string {
 	return c.name
 }
 
+// Returns the SQLType of the column.
 func (c *columnImpl) Type() types.SQLType {
 	return c.sqlType
 }
 
-// Look up the given constraint type in the column, and return it if it exists, along
+// Looks-up the given constraint type in the column, and returns it if it exists, along
 // with a bool indicating its existence.
 func (c *columnImpl) ConstraintFor(constraintType ConstraintType) (Constraint, bool) {
 	constraint, found := c.constraints[constraintType]
 	return constraint, found
 }
 
-// Return a list of all constraints in the constraints map for this column.
+// Returns a list of all constraints in the constraints map for this column.
 func (c *columnImpl) Constraints() []Constraint {
 	constraints := make([]Constraint, len(c.constraints))
 	for _, constraint := range c.constraints {
@@ -78,8 +79,7 @@ func (c *columnImpl) Constraints() []Constraint {
 	return constraints
 }
 
-// Construct a new columnImpl object with the given name and SQLType,
-// and return a pointer to it.
+// Constructs a new column of the default implementation, with the given name and SQLType.
 func newColumn(name string, sqlType types.SQLType) *columnImpl {
 	return &columnImpl{
 		name:        name,

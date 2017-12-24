@@ -31,7 +31,9 @@ func (e *notFoundError) Error() string {
 }
 
 // This is the type of error to raise if the typeName cannot be resolved.
+//
 // typeName is the unresolved typeName.
+//
 // msg is an error message to return.
 type unknownTypeError struct {
 	typeName string

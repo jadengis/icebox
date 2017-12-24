@@ -25,9 +25,13 @@ import (
 //
 // Name returns the name of the SQL table.
 //
+// Columns returns the slice of all columns in this table.
+//
 // ColumnFor returns the Table column for the given column name.
 //
 // Relations returns the slice of Relations on this table.
+//
+// RelationFor returns the relation on the table for the given relation type.
 type Table interface {
 	Type() reflect.Type
 	Name() string
@@ -37,13 +41,15 @@ type Table interface {
 	RelationFor(RelationType) (Relation, bool)
 }
 
-// tableImpl is a the default implementation of the Table interface.
+// The default implementation of the Table interface.
 //
 // Type is the type of the object that generated this table.
 //
 // Name is the name of the SQL table.
 //
 // Columns is the collection of columns in the SQL table mapped by name.
+//
+// Relations is the collection of relations on the tabel mapped by type.
 type tableImpl struct {
 	dataType  reflect.Type
 	name      string
@@ -51,14 +57,17 @@ type tableImpl struct {
 	relations map[RelationType]*relationImpl
 }
 
+// Returns the reflect.Type this table corresponds to.
 func (t *tableImpl) Type() reflect.Type {
 	return t.dataType
 }
 
+// Returns the name of this table.
 func (t *tableImpl) Name() string {
 	return t.name
 }
 
+// Return the slice of columns in this table by pulling them from the column map.
 func (t *tableImpl) Columns() []Column {
 	columns := make([]Column, len(t.columns))
 	for _, column := range t.columns {
@@ -67,6 +76,8 @@ func (t *tableImpl) Columns() []Column {
 	return columns
 }
 
+// Looks-up the given column name in the table, and returns the corresponding
+// Column, if it exists.
 func (t *tableImpl) ColumnFor(name string) (Column, error) {
 	column, found := t.columns[name]
 	if !found {
@@ -78,6 +89,7 @@ func (t *tableImpl) ColumnFor(name string) (Column, error) {
 	return column, nil
 }
 
+// Returns the slice of relations on this table by pulling them from the relation map.
 func (t *tableImpl) Relations() []Relation {
 	relations := make([]Relation, len(t.relations))
 	for _, relation := range t.relations {
@@ -86,18 +98,21 @@ func (t *tableImpl) Relations() []Relation {
 	return relations
 }
 
+// Looks-up the given column name in the table, and returns the corresponding
+// Column, if it exists.
 func (t *tableImpl) RelationFor(relationType RelationType) (Relation, bool) {
 	relation, found := t.relations[relationType]
 	return relation, found
 }
 
-// NewTable constructs a new Table with the given name and an
-// empty column map.
+// Constructs a new table of the default implementation with the given name and an
+// empty column map and empty relation map.
 func newTable(dataType reflect.Type, name string) *tableImpl {
 	return &tableImpl{
-		dataType: dataType,
-		name:     name,
-		columns:  make(map[string]*columnImpl),
+		dataType:  dataType,
+		name:      name,
+		columns:   make(map[string]*columnImpl),
+		relations: make(map[RelationType]*relationImpl),
 	}
 }
 

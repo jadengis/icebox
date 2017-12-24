@@ -22,7 +22,10 @@ import (
 )
 
 // NewSchema will construct a database schema given a name for the database
-// and a list of objects.
+// and a list of objects that will comprise this schema.
+//
+// If there are an errors during schema generation, this function will return
+// an error.
 func NewSchema(name string, objects ...interface{}) (Schema, error) {
 	// Iterate through the all the objects, and build tables for each.
 	schema := newSchema(name)
@@ -38,6 +41,10 @@ func NewSchema(name string, objects ...interface{}) (Schema, error) {
 	return schema, nil
 }
 
+// Construct and populate the database table corresponding to the given object.
+// This function use the default implementation of the Table interface.
+//
+// If table generation fails, this method will return an error.
 func generateTable(object interface{}) (*tableImpl, error) {
 	objectType := reflect.TypeOf(object)
 	if objectType.Kind() == reflect.Ptr {
@@ -74,6 +81,8 @@ func generateTable(object interface{}) (*tableImpl, error) {
 	return table, nil
 }
 
+// Get the concrete type of a reflect.Type, that is, resolve what the given type
+// points to.
 func getConcreteObjectType(objectType reflect.Type) reflect.Type {
 	if objectType.Kind() == reflect.Ptr {
 		objectType = objectType.Elem()
@@ -81,6 +90,8 @@ func getConcreteObjectType(objectType reflect.Type) reflect.Type {
 	return objectType
 }
 
+// Process a column tag on struct, and return a corresponding column.
+// This function uses the default Column implementation.
 func handleColumnTag(field reflect.StructField, parsedTag tags.ParsedTag) *columnImpl {
 	if info, found := parsedTag.GetInfo(tags.Column); found {
 		delete(parsedTag, tags.Column)
@@ -96,6 +107,8 @@ func handleColumnTag(field reflect.StructField, parsedTag tags.ParsedTag) *colum
 	return nil
 }
 
+// Map the type of the given struct field to its corresponding SQLType.
+// This returns an error if the struct field type is not supported.
 func mapSQLTypeFromField(field reflect.StructField) (types.SQLType, error) {
 	switch kind := getConcreteObjectType(field.Type).Kind(); kind {
 	case reflect.Bool:

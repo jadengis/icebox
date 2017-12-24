@@ -57,6 +57,8 @@ const (
 	ManyToMany
 )
 
+// Map the given subtag to its corresponding relation type, if possible.
+// This returns an error if the mapping is not possible.
 func getRelationType(typeName tags.SubTag) (RelationType, error) {
 	switch typeName {
 	case tags.OneToOne:
@@ -74,20 +76,30 @@ func getRelationType(typeName tags.SubTag) (RelationType, error) {
 	}
 }
 
+// The default implementation of the Relation interface.
+//
+// RelationType is the relation type of this relation.
+//
+// Table is a pointer to the related table.
+//
+// Details is the type specific details of this relation.
 type relationImpl struct {
 	relationType RelationType
 	table        *tableImpl
 	details      string
 }
 
+// Returns the internal relation type of this relation.
 func (r *relationImpl) Type() RelationType {
 	return r.relationType
 }
 
+// Returns the Table this relation points to.
 func (r *relationImpl) PointsTo() Table {
 	return r.table
 }
 
+// Returns the internal type specific details of this relation.
 func (r *relationImpl) Details() string {
 	return r.details
 }
